@@ -120,6 +120,7 @@ def four():
             self.directed = directed
             self.nodes = self.build_nodes()
             self.edges = self.build_edges()
+            self.graph = self.build_graph()
 
         def build_nodes(self):
             return [i for i in range(self.n)]
@@ -143,6 +144,12 @@ def four():
                     count_edge +=1
             return list_edges
 
+        def build_graph(self):
+            G = nx.Graph()
+            G.add_nodes_from(self.nodes)
+            G.add_edges_from(self.edges)
+            return G.to_undirected()
+
     class CustomSmallWorldRandomNetwork:
         def __init__(self, n, m=0, directed=False, no_random_edge=0):
             self.no_random_edge = no_random_edge
@@ -153,6 +160,7 @@ def four():
             self.m = len(self.edges)
             if self.m != m:
                 raise Exception("Error on Graph Formulation!!!")
+            self.graph = self.build_graph()
 
         def build_nodes(self):
             return [i for i in range(self.n)]
@@ -180,20 +188,23 @@ def four():
                 a = random.randint(0,self.n-1)
                 b = random.randint(0,self.n-1)
                 if a != b:
-                    if (a < b):
-                        possible_edge = (a,b)
-                    else:
-                        possible_edge = (b,a)
-                    if possible_edge not in list_edges:
-                        list_edges.append(possible_edge)
+                    if (a,b) not in list_edges and (b,a) not in list_edges:
+                        list_edges.append((a,b))
                         count_edge +=1
             return list_edges
+
+        def build_graph(self):
+            G = nx.Graph()
+            G.add_nodes_from(self.nodes)
+            G.add_edges_from(self.edges)
+            return G.to_undirected()
 
     def report_property(G):
         # degree_distribution_G
         # clustering_coefficient_G
         # diameter_G
         print("(#nodes, #edges) : ", (len(G.nodes),len(G.edges)))
+        # print(G.edges)
 
     cgnm = CustomGnm(5242,14484)
     cswrn = CustomSmallWorldRandomNetwork(5242,14484,no_random_edge=4000)
@@ -201,9 +212,8 @@ def four():
     # cgnm = CustomGnm(6,14)
     # cswrn = CustomSmallWorldRandomNetwork(6,14,no_random_edge=2)
     # ngnm = nx.gnm_random_graph(6,14)
-
-    report_property(cgnm)
-    report_property(cswrn)
+    report_property(cgnm.graph)
+    report_property(cswrn.graph)
     report_property(ngnm)
 
 def five():
